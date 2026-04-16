@@ -1,7 +1,17 @@
 import React from 'react';
 
-export const Card = ({ children, className = '' }: { children: React.ReactNode, className?: string }) => (
-  <div className={`rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden ${className}`}>{children}</div>
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const Card = ({ children, className = '', ...props }: CardProps) => (
+  <div 
+    className={`rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden ${className}`}
+    {...props}
+  >
+    {children}
+  </div>
 );
 
 export const CardHeader = ({ children, className = '' }: { children: React.ReactNode, className?: string }) => (

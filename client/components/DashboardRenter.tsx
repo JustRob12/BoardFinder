@@ -4,30 +4,48 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 import { Button } from './ui/Button';
 import { createClient } from '../utils/supabase/client';
+import { PropertyDetailModal } from './PropertyDetailModal';
 
 export const DashboardRenter = () => {
   const [houses, setHouses] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  
   const supabase = createClient();
 
+  const fetchHouses = async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from('boarding_houses')
+      .select(`
+        *,
+        users (
+          name
+        ),
+        boarding_house_images (
+          image_url
+        )
+      `)
+      .order('is_featured', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching boarding houses:', error);
+    } else {
+      setHouses(data || []);
+    }
+    setIsLoading(false);
+  };
+
   useEffect(() => {
-    const fetchHouses = async () => {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('boarding_houses')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching boarding houses:', error);
-      } else {
-        setHouses(data || []);
-      }
-      setIsLoading(false);
-    };
-
     fetchHouses();
   }, [supabase]);
+
+  const handleOpenDetail = (house: any) => {
+    setSelectedProperty(house);
+    setIsDetailModalOpen(true);
+  };
 
   if (isLoading) {
     return (
@@ -64,11 +82,15 @@ export const DashboardRenter = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {houses.map((house) => (
-            <Card key={house.id} className="group cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-border/50 bg-background">
+            <Card 
+              key={house.id} 
+              onClick={() => handleOpenDetail(house)}
+              className="group cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-border/50 bg-background"
+            >
               <div className="aspect-[4/3] relative overflow-hidden rounded-t-xl bg-secondary">
-                {house.image_url ? (
+                {house.boarding_house_images && house.boarding_house_images.length > 0 ? (
                   <img 
-                    src={house.image_url} 
+                    src={house.boarding_house_images[0].image_url} 
                     alt={house.title} 
                     className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700" 
                   />
@@ -77,8 +99,16 @@ export const DashboardRenter = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                   </div>
                 )}
-                <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shadow-sm text-primary">
-                  Available
+                <div className="absolute top-2 right-2 flex gap-1">
+                  {house.is_featured && (
+                    <div className="bg-amber-400 text-white px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      Featured
+                    </div>
+                  )}
+                  <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shadow-sm text-primary">
+                    {house.boarding_house_images?.length > 1 ? `+${house.boarding_house_images.length - 1} Photos` : 'Available'}
+                  </div>
                 </div>
               </div>
               <CardHeader className="p-5 pb-2">
@@ -102,6 +132,14 @@ export const DashboardRenter = () => {
             </Card>
           ))}
         </div>
+      )}
+
+      {selectedProperty && (
+        <PropertyDetailModal 
+          isOpen={isDetailModalOpen} 
+          onClose={() => setIsDetailModalOpen(false)} 
+          property={selectedProperty} 
+        />
       )}
     </div>
   );

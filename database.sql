@@ -19,7 +19,35 @@ CREATE TABLE IF NOT EXISTS boarding_houses (
     description TEXT,
     price DECIMAL(10, 2) NOT NULL,
     location TEXT NOT NULL,
-    image_url TEXT,
+    is_featured BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- New table for multiple photos
+CREATE TABLE IF NOT EXISTS boarding_house_images (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    boarding_house_id UUID REFERENCES boarding_houses(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Table for user profile information (contact details)
+CREATE TABLE IF NOT EXISTS profile_information (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+    phone_number TEXT,
+    facebook_name TEXT,
+    bio TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Subscriptions table
+CREATE TABLE IF NOT EXISTS subscriptions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+    tier INTEGER NOT NULL CHECK (tier IN (1, 2, 3)),
+    post_limit INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'paid',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
