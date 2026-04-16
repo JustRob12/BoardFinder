@@ -30,6 +30,7 @@ export const Navbar = () => {
               src="/boardfinder.png" 
               alt="BoardFinder Logo" 
               fill
+              sizes="36px"
               className="object-cover"
             />
           </div>
@@ -49,8 +50,18 @@ export const Navbar = () => {
                     <span className="text-sm font-black text-primary leading-none capitalize">{user.user_metadata.name}</span>
                     <span className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">{currentRole}</span>
                  </div>
-                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black border-2 border-white shadow-sm group-hover:scale-105 transition-transform">
-                    {user.user_metadata.name?.charAt(0) || 'U'}
+                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black border-2 border-white shadow-sm group-hover:scale-105 transition-transform overflow-hidden relative">
+                    {user.user_metadata.avatar_url ? (
+                      <Image 
+                        src={user.user_metadata.avatar_url} 
+                        alt="Avatar" 
+                        fill 
+                        className="object-cover"
+                        sizes="40px"
+                      />
+                    ) : (
+                      user.user_metadata.name?.charAt(0) || 'U'
+                    )}
                  </div>
               </button>
 
@@ -80,6 +91,17 @@ export const Navbar = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M21 16v5h-5"/><path d="M3 16v5h5"/><path d="M15 9 9 15"/><path d="M9 9 15 15"/></svg>
                     Switch to {currentRole === 'renter' ? 'Landlord' : 'Renter'}
                   </button>
+
+                  {currentRole === 'landlord' && (
+                    <Link 
+                      href="/subscription" 
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-foreground hover:bg-primary/5 hover:text-primary transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="m17 7-5-5-5 5"/><path d="M12 2v20"/></svg>
+                      Subscription
+                    </Link>
+                  )}
 
                   <div className="h-px bg-primary/5 my-2" />
 

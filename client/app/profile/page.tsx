@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/Input';
 import { createClient } from '@/utils/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { Navbar } from '@/components/Navbar';
+import { CldUploadWidget } from 'next-cloudinary';
 
 export default function ProfilePage() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, updateAvatar } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -107,8 +108,43 @@ export default function ProfilePage() {
             <div className="space-y-6">
               <Card className="border-none shadow-xl shadow-primary/5 bg-white">
                 <CardContent className="pt-8 flex flex-col items-center text-center">
-                  <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-4xl font-black mb-4 border-4 border-white shadow-lg">
-                    {user?.user_metadata?.name?.charAt(0) || 'U'}
+                  <div className="relative group">
+                    <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-4xl font-black mb-4 border-4 border-white shadow-lg overflow-hidden">
+                      {user?.user_metadata?.avatar_url ? (
+                        <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        user?.user_metadata?.name?.charAt(0) || 'U'
+                      )}
+                    </div>
+                    
+                    <CldUploadWidget 
+                      uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                      onSuccess={async (result: any) => {
+                        if (result.info && typeof result.info === 'object') {
+                          try {
+                            await updateAvatar(result.info.secure_url);
+                          } catch (err) {
+                            alert('Failed to update avatar in database');
+                          }
+                        }
+                      }}
+                      options={{
+                        multiple: false,
+                        maxFiles: 1,
+                        cropping: true,
+                        croppingAspectRatio: 1,
+                        showSkipCropButton: true
+                      }}
+                    >
+                      {({ open }) => (
+                        <button 
+                          onClick={() => open()}
+                          className="absolute bottom-4 right-0 bg-primary text-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center border-2 border-white"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                        </button>
+                      )}
+                    </CldUploadWidget>
                   </div>
                   <h2 className="text-xl font-bold text-primary">{user?.user_metadata?.name}</h2>
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{user?.user_metadata?.role}</p>

@@ -14,6 +14,7 @@ interface AuthContextType {
   register: (email: string, password: string, name: string, role: Role) => Promise<void>;
   logout: () => Promise<void>;
   switchRole: () => Promise<void>;
+  updateAvatar: (url: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -89,8 +90,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateAvatar = async (url: string) => {
+    if (!user) return;
+    
+    // 1. Update Supabase Auth metadata
+    const { error: authError } = await supabase.auth.updateUser({
+      data: { avatar_url: url }
+    });
+    if (authError) throw authError;
+
+    // 2. Update public.users table for persistence and joins
+    const { error: dbError } = await supabase
+      .from('users')
+      .update({ avatar_url: url })
+      .eq('id', user.id);
+    if (dbError) throw dbError;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, currentRole, isLoading, login, register, logout, switchRole }}>
+    <AuthContext.Provider value={{ user, currentRole, isLoading, login, register, logout, switchRole, updateAvatar }}>
       {children}
     </AuthContext.Provider>
   );

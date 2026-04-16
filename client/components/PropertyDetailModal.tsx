@@ -169,11 +169,19 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ isOpen
               ) : landlordProfile ? (
                 <div className="bg-slate-50 p-5 rounded-3xl space-y-5 border border-slate-100 shadow-inner">
                   <div className="flex  items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-primary/20 border-4 border-white">
-                      {property.users?.name?.charAt(0) || "L"}
+                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black shadow-lg shadow-primary/20 border-4 border-white overflow-hidden relative">
+                      {property.landlord?.avatar_url ? (
+                        <img 
+                          src={property.landlord.avatar_url} 
+                          alt={property.landlord.name} 
+                          className="w-full h-full object-cover" 
+                        />
+                      ) : (
+                        property.landlord?.name?.charAt(0) || "L"
+                      )}
                     </div>
                     <div className="space-y-0.5">
-                      <p className="text-lg font-black text-primary leading-none">{property.users?.name || "Landlord"}</p>
+                      <p className="text-lg font-black text-primary leading-none">{property.landlord?.name || "Landlord"}</p>
                       <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded inline-block">Direct Contact</p>
                     </div>
                   </div>

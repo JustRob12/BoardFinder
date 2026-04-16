@@ -66,7 +66,7 @@ export default function SubscriptionPage() {
       if (error) throw error;
 
       alert(`Successfully subscribed to ${tier.name}!`);
-      router.push('/dashboard');
+      router.push('/');
     } catch (error: any) {
       alert(error.message || 'Error processing subscription');
     } finally {

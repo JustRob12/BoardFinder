@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 import { Button } from './ui/Button';
 import { createClient } from '../utils/supabase/client';
@@ -9,6 +10,7 @@ import { ListingModal } from './ListingModal';
 
 export const DashboardLandlord = () => {
   const { user } = useAuth();
+  const router = useRouter();
   const [myHouses, setMyHouses] = useState<any[]>([]);
   const [subscription, setSubscription] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,12 +98,12 @@ export const DashboardLandlord = () => {
     if (!subscription) {
       // No subscription yet, assume 0 limit for now or check if they have at least 1 post
       if (myHouses.length >= 1) {
-         window.location.href = '/subscription';
+         router.push('/subscription');
          return;
       }
     } else if (myHouses.length >= subscription.post_limit) {
-      alert(`You have reached your post limit (${subscription.post_limit}). Please upgrade your plan component to add more.`);
-      window.location.href = '/subscription';
+      alert(`You have reached your post limit (${subscription.post_limit}). Please upgrade your plan to add more.`);
+      router.push('/subscription');
       return;
     }
     

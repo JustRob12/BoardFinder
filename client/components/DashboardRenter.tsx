@@ -20,8 +20,9 @@ export const DashboardRenter = () => {
       .from('boarding_houses')
       .select(`
         *,
-        users (
-          name
+        landlord:landlord_id (
+          name,
+          avatar_url
         ),
         boarding_house_images (
           image_url
@@ -32,6 +33,7 @@ export const DashboardRenter = () => {
 
     if (error) {
       console.error('Error fetching boarding houses:', error);
+      console.log('Error Details:', JSON.stringify(error, null, 2));
     } else {
       setHouses(data || []);
     }
